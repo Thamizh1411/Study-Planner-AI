@@ -1,0 +1,7 @@
+{
+  "name": "study-planner-triton",
+  "private": true,
+  "scripts": {
+    "test": "pytest -q backend/tests"
+  }
+}

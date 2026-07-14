@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: studyuser
+      POSTGRES_PASSWORD: studysecret
+      POSTGRES_DB: studyplanner
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://studyuser:studysecret@postgres:5432/studyplanner
+      - SECRET_KEY=supersecretkeychangeinproduction1234567890!
+      # Set DEFAULT_PROVIDER to one of: ollama, openai, gemini, anthropic
+      # You can override this locally via a backend/.env file or by exporting the env var
+      - DEFAULT_PROVIDER=ollama
+      - DEFAULT_MODEL=gpt-4.1-mini
+      - OLLAMA_BASE_URL=http://ollama:11434
+      # If you want to use OpenAI, set OPENAI_API_KEY in your host environment
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - postgres
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ghcr.io/ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_IP=0.0.0.0
+    volumes:
+      - ollama-data:/var/lib/ollama
+    command: ["ollama", "serve"]
+    restart: unless-stopped
+
+  streamlit:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://backend:8000/api/v1
+    depends_on:
+      - backend
+    restart: unless-stopped
+    command: ["streamlit", "run", "/app/streamlit_app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+
+volumes:
+  postgres-data:
+  ollama-data:
