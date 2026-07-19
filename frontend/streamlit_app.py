@@ -49,7 +49,7 @@ def api_get(path):
 
 
 def login(email: str, password: str):
-    payload = {"email": email, "password": password}
+    payload = {"email": email.strip(), "password": password}
     data = api_post("/auth/login", payload)
     st.session_state.auth_token = data["access_token"]
     st.session_state.user = data.get("user")
@@ -101,11 +101,20 @@ with st.sidebar:
             email = st.text_input("Email", key="login_email")
             password = st.text_input("Password", type="password", key="login_password")
             if st.button("Login"):
-                try:
-                    login(email, password)
-                    st.rerun()
-                except Exception as exc:
-                    st.error(f"Login failed: {exc}")
+                if not email.strip() or not password:
+                    st.error("Enter both your email address and password.")
+                else:
+                    try:
+                        login(email, password)
+                        st.rerun()
+                    except httpx.HTTPStatusError as exc:
+                        try:
+                            message = exc.response.json().get("detail", exc.response.text)
+                        except (ValueError, AttributeError):
+                            message = exc.response.text
+                        st.error(f"Login failed: {message}")
+                    except httpx.RequestError:
+                        st.error("Cannot reach the API. Start the FastAPI backend on port 8000.")
         else:
             name = st.text_input("Name", key="signup_name")
             email = st.text_input("Email", key="signup_email")

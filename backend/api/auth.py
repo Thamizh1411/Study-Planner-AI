@@ -2,6 +2,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from backend.core.config import settings
 from backend.core.security import verify_password, get_password_hash, create_access_token
@@ -34,7 +35,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 @router.post("/signup", response_model=UserOut)
 def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     # Check if user exists
-    user = db.query(User).filter(User.email == user_in.email).first()
+    email = str(user_in.email).strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == email).first()
     if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -43,7 +45,7 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
         
     db_user = User(
         name=user_in.name,
-        email=user_in.email,
+        email=email,
         password=get_password_hash(user_in.password),
         provider="email"
     )
@@ -54,7 +56,10 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 def login(user_in: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == user_in.email).first()
+    # Email addresses should not fail login simply because a user changed case
+    # (for example, ``Anbu@gmail.com`` versus ``anbu@gmail.com``).
+    email = str(user_in.email).strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == email).first()
     if not user or not user.password or not verify_password(user_in.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

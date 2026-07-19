@@ -177,6 +177,42 @@ erDiagram
    python main.py
    ```
 
+### Connect pgAdmin 4
+
+pgAdmin is only a database viewer/manager; the application connects through
+`backend/.env`. To inspect the same database used by the manual backend setup,
+register a server in pgAdmin with these values from that file:
+
+| pgAdmin field | Value |
+| --- | --- |
+| Host name/address | `localhost` |
+| Port | `5432` |
+| Maintenance database | `postgres` |
+| Username | `postgres` |
+| Password | the password in `backend/.env` (currently `123456`) |
+
+After saving, open **Servers → your server → Databases → studyplanner → Schemas
+→ public → Tables → users**. Right-click `users` and choose **View/Edit Data →
+All Rows** to see registered accounts. If you use Docker Compose instead, use
+the PostgreSQL credentials in `docker-compose.yml` (`studyuser` /
+`studysecret`) rather than the manual `.env` credentials.
+
+### Login troubleshooting
+
+Use **Login** for an account that already exists; **Signup** intentionally
+returns an error for an existing email. Restart both the FastAPI backend and
+Streamlit after changing `.env` or source files. A `422 Unprocessable Content`
+means the backend did not receive a valid email/password body; open
+`http://localhost:8000/docs`, use **POST `/api/v1/auth/login`**, and send:
+
+```json
+{"email": "you@example.com", "password": "your-password"}
+```
+
+If pgAdmin's `studyplanner.public.users` table does not contain the account,
+that account was created in a different database (commonly the old local
+`study_planner.db` SQLite file) and must be created again in PostgreSQL.
+
 
 ## Testing
 
