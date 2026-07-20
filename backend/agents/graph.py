@@ -7,25 +7,31 @@ from backend.agents.scheduler import SchedulerAgent
 from backend.agents.analyzer import PerformanceAnalyzerAgent
 from backend.agents.motivator import MotivationAgent
 
-# Initialize graph
 workflow = StateGraph(PlannerState)
 
-# Register node handlers
-workflow.add_node("researcher", ResearchAgent.execute)
-workflow.add_node("summarizer", SummarizerAgent.execute)
-workflow.add_node("quiz_generator", QuizGeneratorAgent.execute)
-workflow.add_node("scheduler", SchedulerAgent.execute)
-workflow.add_node("analyzer", PerformanceAnalyzerAgent.execute)
-workflow.add_node("motivator", MotivationAgent.execute)
+NODES = (
+    ("researcher", ResearchAgent.execute),
+    ("summarizer", SummarizerAgent.execute),
+    ("quiz_generator", QuizGeneratorAgent.execute),
+    ("scheduler", SchedulerAgent.execute),
+    ("analyzer", PerformanceAnalyzerAgent.execute),
+    ("motivator", MotivationAgent.execute),
+)
 
-# Define transitions
-workflow.add_edge(START, "researcher")
-workflow.add_edge("researcher", "summarizer")
-workflow.add_edge("summarizer", "quiz_generator")
-workflow.add_edge("quiz_generator", "scheduler")
-workflow.add_edge("scheduler", "analyzer")
-workflow.add_edge("analyzer", "motivator")
-workflow.add_edge("motivator", END)
+for node_name, handler in NODES:
+    workflow.add_node(node_name, handler)
 
-# Compile graph
+EDGES = (
+    (START, "researcher"),
+    ("researcher", "summarizer"),
+    ("summarizer", "quiz_generator"),
+    ("quiz_generator", "scheduler"),
+    ("scheduler", "analyzer"),
+    ("analyzer", "motivator"),
+    ("motivator", END),
+)
+
+for source, destination in EDGES:
+    workflow.add_edge(source, destination)
+
 planner_graph = workflow.compile()

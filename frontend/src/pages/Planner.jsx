@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { usePlannerStore } from '../store/plannerStore';
-import { Calendar, Sparkles, Check, Play, AlertTriangle, ArrowRight } from 'lucide-react';
-import axios from 'axios';
+import { Calendar, Sparkles, Check, Play, AlertTriangle } from 'lucide-react';
 
 export default function Planner() {
   const { exam, schedule, weak_topics, fetchDashboard, generateAIPlan, loading } = usePlannerStore();
-  const [activeTab, setActiveTab] = useState('list'); // list or timeline
   const [selectedDay, setSelectedDay] = useState('');
 
   useEffect(() => {

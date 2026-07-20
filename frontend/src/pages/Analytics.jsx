@@ -28,7 +28,7 @@ ChartJS.register(
 );
 
 export default function Analytics() {
-  const { exam, progressLogs, fetchProgressLogs, fetchDashboard, analysis, weak_topics } = usePlannerStore();
+  const { exam, progressLogs, fetchProgressLogs, fetchDashboard, weak_topics } = usePlannerStore();
 
   useEffect(() => {
     fetchDashboard();

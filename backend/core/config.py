@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY")
     ANTHROPIC_API_KEY: str | None = os.getenv("ANTHROPIC_API_KEY")
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    # Keep local-model responses short enough for an interactive UI.  The value
+    # can be raised in backend/.env when longer answers are required.
+    OLLAMA_NUM_PREDICT: int = int(os.getenv("OLLAMA_NUM_PREDICT", "128"))
+    # A complete plan normally needs many separate model calls.  The fast mode
+    # creates the schedule locally and keeps the tutor powered by Ollama.
+    PLAN_USE_LLM: bool = os.getenv("PLAN_USE_LLM", "false").lower() in ("1", "true", "yes")
     DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "ollama")  # gemini, openai, anthropic, ollama
     DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", "gpt-4.1-mini") # or gpt-4.1-mini / llama3
 

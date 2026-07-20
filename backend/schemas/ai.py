@@ -1,10 +1,11 @@
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 class ChatRequest(BaseModel):
     topic_title: str
     question: str
-    chat_history: Optional[List[Dict[str, str]]] = []
+    chat_history: list[dict[str, str]] = Field(default_factory=list)
 
 class ChatResponse(BaseModel):
     answer: str
@@ -12,11 +13,11 @@ class ChatResponse(BaseModel):
 class OCRResponse(BaseModel):
     extracted_text: str
     summary: str
-    quiz: List[Dict[str, Any]]
+    quiz: list[dict[str, Any]]
 
 class RAGQueryRequest(BaseModel):
     query: str
 
 class RAGQueryResponse(BaseModel):
     answer: str
-    sources: List[str]
+    sources: list[str]

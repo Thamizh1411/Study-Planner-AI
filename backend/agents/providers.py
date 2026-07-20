@@ -7,8 +7,8 @@ logger = logging.getLogger("study_planner_agents")
 
 
 class LLMProvider:
-    DEFAULT_TIMEOUT_SECS: float = 300.0
-    DEFAULT_MAX_RETRIES: int = 1
+    DEFAULT_TIMEOUT_SECS: float = 90.0
+    DEFAULT_MAX_RETRIES: int = 0
     DEFAULT_BACKOFF_SECS: float = 0.5
 
     @staticmethod
@@ -44,10 +44,12 @@ class LLMProvider:
 
         
 
-        timeout = httpx.Timeout(connect=30.0,
-    read=300.0,
-    write=300.0,
-    pool=300.0,)
+        timeout = httpx.Timeout(
+            connect=15.0,
+            read=effective_timeout_secs,
+            write=effective_timeout_secs,
+            pool=effective_timeout_secs,
+        )
 
         last_err: Exception | None = None
         for attempt in range(effective_max_retries + 1):
@@ -84,7 +86,7 @@ class LLMProvider:
                     str(e),
                 )
 
-            if attempt < LLMProvider.DEFAULT_MAX_RETRIES:
+            if attempt < effective_max_retries:
                 try:
                     import time
 
@@ -178,7 +180,10 @@ class LLMProvider:
                 {"role": "user", "content": prompt},
             ],
             "stream": False,
-            "options": {"temperature": 0.7},
+            "options": {
+                "temperature": 0.7,
+                "num_predict": settings.OLLAMA_NUM_PREDICT,
+            },
         }
 
         if json_mode:
@@ -229,4 +234,3 @@ class LLMProvider:
                 }
             )
         return "Mock response. Please set up API keys in the backend .env file."
-

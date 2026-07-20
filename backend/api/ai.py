@@ -8,6 +8,7 @@ from backend.database.models import User, Exam, Subject, Topic, StudyPlan, Note,
 from backend.api.auth import get_current_user
 from backend.agents.graph import planner_graph
 from backend.agents.providers import LLMProvider
+from backend.agents.scheduler import SchedulerAgent
 from backend.schemas.ai import ChatRequest, ChatResponse, OCRResponse, RAGQueryRequest, RAGQueryResponse
 
 router = APIRouter(prefix="/ai", tags=["ai"])
@@ -166,14 +167,38 @@ def generate_study_plan(
         for t in topics_budgeted
     ]
 
-    try:
-        final_state = planner_graph.invoke(state_input)
-    except RuntimeError as e:
-        logger.error(f"LangGraph execution timed out: {str(e)}")
-        raise HTTPException(status_code=504, detail=f"Generate plan timed out: {str(e)}")
-    except Exception as e:
-        logger.error(f"LangGraph execution failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"AI Agent pipeline failed: {str(e)}")
+    if settings.PLAN_USE_LLM:
+        try:
+            final_state = planner_graph.invoke(state_input)
+        except RuntimeError as e:
+            logger.error(f"LangGraph execution timed out: {str(e)}")
+            raise HTTPException(status_code=504, detail=f"Generate plan timed out: {str(e)}")
+        except Exception as e:
+            logger.error(f"LangGraph execution failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"AI Agent pipeline failed: {str(e)}")
+    else:
+        # Scheduling is deterministic, so it does not need to wait for the
+        # local model several times.  This is the responsive default for a UI.
+        final_state = SchedulerAgent.execute(state_input)
+        final_state["analysis"] = {
+            "completion_rate": 0.0,
+            "average_quiz_score": 0.0,
+            "productivity_score": 100.0,
+            "learning_score": 50.0,
+            "weekly_summary": "Your plan is ready. Complete each study block, then use the tutor for help on a topic.",
+            "suggestions": [
+                "Start with low-confidence topics.",
+                "Review each topic after its study session.",
+            ],
+            "productivity_badge": "Plan Ready",
+        }
+        final_state["motivation"] = {
+            "daily_motivation": "Small, consistent study sessions produce strong results.",
+            "study_tips": ["Use active recall after every study block."],
+            "pomodoro_suggestion": "Study for 25 minutes, then take a 5-minute break.",
+            "break_reminder": "Stand up, hydrate, and rest your eyes during breaks.",
+            "stress_management": "Focus on the next scheduled task rather than the whole syllabus.",
+        }
 
 
         

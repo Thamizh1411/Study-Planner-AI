@@ -61,7 +61,7 @@ export default function Quiz() {
       setQuizQuestions(res.data.questions || []);
       setQuizDifficulty(res.data.difficulty || 'medium');
       setTimerActive(true);
-    } catch (err) {
+    } catch {
       setQuizQuestions([]);
     } finally {
       setQuizLoading(false);

@@ -9,9 +9,7 @@ import {
   Plus,
   Trash2,
   Sparkles,
-  TrendingUp,
   Brain,
-  HelpCircle,
   CheckCircle,
   Play
 } from 'lucide-react';
@@ -40,8 +38,8 @@ export default function Dashboard() {
   // Create Exam Form state
   const [examName, setExamName] = useState('');
   const [examDate, setExamDate] = useState('');
-  const [examPriority, setExamPriority] = useState('medium');
-  const [examDifficulty, setExamDifficulty] = useState('medium');
+  const examPriority = 'medium';
+  const examDifficulty = 'medium';
   
   // Custom subject list builder
   const [subjects, setSubjects] = useState([{ name: '', difficulty: 'medium' }]);

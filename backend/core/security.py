@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 from datetime import datetime, timedelta
 from typing import Any, Union
 from jose import jwt
@@ -9,7 +10,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     if hashed_password.startswith("pbkdf2_sha256$"):
         algorithm, salt, expected = hashed_password.split("$", 2)
         digest = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt.encode("utf-8"), 200000)
-        return digest.hex() == expected
+        return hmac.compare_digest(digest.hex(), expected)
     return False
 
 
@@ -18,7 +19,7 @@ def get_password_hash(password: str) -> str:
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 200000)
     return f"pbkdf2_sha256${salt}${digest.hex()}"
 
-def create_access_token(subject: Union[str, Any], expires_delta: timedelta = None) -> str:
+def create_access_token(subject: Union[str, Any], expires_delta: timedelta | None = None) -> str:
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:

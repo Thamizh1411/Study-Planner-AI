@@ -229,13 +229,17 @@ with tabs[3]:
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
     if st.button("Ask Tutor"):
-        try:
-            response = chat_tutor(topic_title, question, st.session_state.chat_history)
-            st.session_state.chat_history.append({"role": "user", "content": question})
-            st.session_state.chat_history.append({"role": "assistant", "content": response["answer"]})
-            st.success("Tutor answered")
-        except Exception as exc:
-            st.error(f"Chat tutor failed: {exc}")
+        if not topic_title.strip() or not question.strip():
+            st.error("Enter both a topic title and a question.")
+        else:
+            try:
+                with st.spinner("Tutor is thinking. The first Ollama response can take about a minute on CPU."):
+                    response = chat_tutor(topic_title, question, st.session_state.chat_history)
+                st.session_state.chat_history.append({"role": "user", "content": question})
+                st.session_state.chat_history.append({"role": "assistant", "content": response["answer"]})
+                st.success("Tutor answered")
+            except Exception as exc:
+                st.error(f"Chat tutor failed: {exc}")
     for msg in st.session_state.chat_history:
         if msg["role"] == "user":
             st.info(f"You: {msg['content']}")

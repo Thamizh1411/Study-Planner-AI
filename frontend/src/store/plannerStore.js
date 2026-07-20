@@ -95,7 +95,7 @@ export const usePlannerStore = create((set, get) => ({
         loading: false 
       });
       return true;
-    } catch (err) {
+    } catch {
       set({ error: 'Google Login failed', loading: false });
       return false;
     }

@@ -10,8 +10,7 @@ import {
   LogOut, 
   Flame,
   Award,
-  Sparkles,
-  BookMarked
+  Sparkles
 } from 'lucide-react';
 
 import Home from './pages/Home';
@@ -47,7 +46,6 @@ function SidebarLink({ to, icon: Icon, children }) {
 function SidebarLayout() {
   const { user, logout, active_streak, analysis } = usePlannerStore();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleLogout = () => {
     logout();

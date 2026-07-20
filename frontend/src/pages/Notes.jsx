@@ -11,14 +11,13 @@ import {
   Send,
   Loader2,
   CheckCircle,
-  FileDown,
   Printer,
   ChevronRight,
   BookOpen
 } from 'lucide-react';
 
 export default function Notes() {
-  const { exam, fetchDashboard } = usePlannerStore();
+  const { exam } = usePlannerStore();
   const [topics, setTopics] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [activeTab, setActiveTab] = useState('notes'); // notes, flashcards, ocr, pdf_rag
@@ -75,7 +74,7 @@ export default function Notes() {
     try {
       const res = await api.get(`/progress/topics/${selectedTopic.id}/notes`);
       setNoteContent(res.data.content);
-    } catch (err) {
+    } catch {
       setNoteContent('Failed to load notes for this topic.');
     } finally {
       setNoteLoading(false);
@@ -88,7 +87,7 @@ export default function Notes() {
       const res = await api.get(`/progress/topics/${selectedTopic.id}/flashcards`);
       setFlashcards(res.data || []);
       setFlippedCardId(null);
-    } catch (err) {
+    } catch {
       setFlashcards([]);
     } finally {
       setCardLoading(false);
