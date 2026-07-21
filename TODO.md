@@ -1,19 +1,19 @@
-# TODO - Timeout fixes for Study Planner AI
+# Study Planner Streamlit - Quizzes & Analytics UI
 
-## Step 1 (Investigate & confirm)
-- [x] Inspect LangGraph pipeline and LLM call counts per topic.
-- [x] Confirm `LLMProvider` default timeout (25s) and retries (1).
+## Progress Tracking
 
-## Step 2 (Implement)
-- [ ] Add `current_user` dependency fix in `backend/api/ai.py` for generate-plan.
-- [ ] Add topic cap (process top-K topics) inside `generate_study_plan`.
-- [ ] Add per-call timeout override + “fast mode” in `LLMProvider.generate()`.
-- [ ] Add summarizer fallback-template mode to reduce one LLM call per topic.
-- [ ] Add overall time budgeting around `planner_graph.invoke()`; on timeout, return partial results.
-- [ ] Run backend and test endpoints to ensure timeout no longer occurs.
+### Phase 1: Update Streamlit App
+- [x] Add Quizzes tab with topic selector sidebar
+- [x] Add quiz question rendering (MCQ, True/False, Fill-blank, Short Answer, Coding)
+- [x] Add 5-minute countdown timer
+- [x] Add quiz submission & evaluation
+- [x] Show rebalanced schedule after quiz submit
+- [x] Add Analytics tab with study hours line chart
+- [x] Add quiz scores bar chart
+- [x] Add study consistency heatmap
+- [x] Add weak topics remediation section
 
-
-## Step 3 (Test)
-- [ ] Run backend and call `/api/v1/ai/chat-tutor` and `/api/v1/ai/generate-plan/{exam_id}`.
-- [ ] Verify responses return (no 504) and contain schedule + partial notes/quizzes.
+### Phase 2: Dependencies & Testing
+- [x] Update requirements.txt with plotly
+- [x] Restart Streamlit server & test
 

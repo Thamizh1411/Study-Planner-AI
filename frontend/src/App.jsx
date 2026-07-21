@@ -10,7 +10,8 @@ import {
   LogOut, 
   Flame,
   Award,
-  Sparkles
+  Sparkles,
+  MessageCircle
 } from 'lucide-react';
 
 import Home from './pages/Home';
@@ -21,6 +22,7 @@ import Planner from './pages/Planner';
 import Notes from './pages/Notes';
 import Quiz from './pages/Quiz';
 import Analytics from './pages/Analytics';
+import Tutor from './pages/Tutor';
 
 // Navigation Link Component with Active States
 function SidebarLink({ to, icon: Icon, children }) {
@@ -101,6 +103,7 @@ function SidebarLayout() {
             <SidebarLink to="/planner" icon={CalendarDays}>Study Planner</SidebarLink>
             <SidebarLink to="/notes" icon={BookOpen}>AI Notes & Spaced Cards</SidebarLink>
             <SidebarLink to="/quiz" icon={GraduationCap}>Practice Quizzes</SidebarLink>
+            <SidebarLink to="/tutor" icon={MessageCircle}>AI Tutor</SidebarLink>
             <SidebarLink to="/analytics" icon={BarChart3}>Analytics Report</SidebarLink>
           </nav>
         </div>
@@ -124,6 +127,7 @@ function SidebarLayout() {
           <Route path="/planner" element={<Planner />} />
           <Route path="/notes" element={<Notes />} />
           <Route path="/quiz" element={<Quiz />} />
+          <Route path="/tutor" element={<Tutor />} />
           <Route path="/analytics" element={<Analytics />} />
         </Routes>
       </main>

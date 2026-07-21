@@ -168,13 +168,16 @@ export const usePlannerStore = create((set, get) => ({
     try {
       const response = await api.post(`/ai/generate-plan/${examId}`);
       const { schedule, analysis, motivation } = response.data;
+
+      // Refresh dashboard metrics before applying the newly generated report.
+      // This prevents the dashboard's default report from overwriting AI output.
+      await get().fetchDashboard();
       set({
         schedule,
         analysis,
         motivation,
         loading: false
       });
-      await get().fetchDashboard();
       return true;
     } catch (err) {
       set({ error: err.response?.data?.detail || 'AI Plan generation failed', loading: false });

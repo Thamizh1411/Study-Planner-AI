@@ -6,10 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from backend.database.connection import get_db
-from backend.database.models import User, Exam, Subject, Topic, StudyPlan, Quiz, Progress, Note, Flashcard
+from backend.database.models import AIReport, User, Exam, Subject, Topic, StudyPlan, Quiz, Progress, Note, Flashcard
 from backend.api.auth import get_current_user
 
-router = APIRouter(tags=["progress"])
+# Keep this prefix aligned with the React client API paths, for example:
+# /api/v1/progress/dashboard and /api/v1/progress/quiz/submit.
+router = APIRouter(prefix="/progress", tags=["progress"])
 logger = logging.getLogger("study_planner_agents")
 
 class QuizSubmit(BaseModel):
@@ -89,6 +91,17 @@ def trigger_schedule_rebalance(user_id: int, db: Session):
         plan_json=study_plan_json
     )
     db.add(db_plan)
+
+    report = db.query(AIReport).filter(AIReport.exam_id == exam.id).first()
+    if report:
+        report.analysis_json = json.dumps(state.get("analysis", {}))
+        report.motivation_json = json.dumps(state.get("motivation", {}))
+    else:
+        db.add(AIReport(
+            exam_id=exam.id,
+            analysis_json=json.dumps(state.get("analysis", {})),
+            motivation_json=json.dumps(state.get("motivation", {})),
+        ))
     db.commit()
     
     return state
@@ -131,7 +144,7 @@ def get_dashboard(current_user: User = Depends(get_current_user), db: Session = 
     
     weak_topics = [t.title for t in topics if any(q.topic_id == t.id and q.score < 60.0 for q in quizzes)]
     
-    # Stub default analyzer/motivation messages if plan hasn't been generated
+    # Defaults are used only until the AI has generated a report for this exam.
     analysis_report = {
         "completion_rate": round(completion_rate, 1),
         "average_quiz_score": round(avg_score, 1),
@@ -149,6 +162,12 @@ def get_dashboard(current_user: User = Depends(get_current_user), db: Session = 
         "break_reminder": "Get up and stretch for 5 minutes.",
         "stress_management": "Breathe deeply. Your efforts are building understanding."
     }
+
+    if exam:
+        report = db.query(AIReport).filter(AIReport.exam_id == exam.id).first()
+        if report:
+            analysis_report = json.loads(report.analysis_json)
+            motivation_report = json.loads(report.motivation_json)
     
     return {
         "exam": exam,

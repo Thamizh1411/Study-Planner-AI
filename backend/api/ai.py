@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.orm import Session
 from backend.database.connection import get_db
-from backend.database.models import User, Exam, Subject, Topic, StudyPlan, Note, Quiz, Flashcard, PDFChunk
+from backend.database.models import AIReport, User, Exam, Subject, Topic, StudyPlan, Note, Quiz, Flashcard, PDFChunk
 from backend.api.auth import get_current_user
 from backend.agents.graph import planner_graph
 from backend.agents.providers import LLMProvider
@@ -213,6 +213,17 @@ def generate_study_plan(
         plan_json=study_plan_json
     )
     db.add(db_plan)
+
+    report = db.query(AIReport).filter(AIReport.exam_id == exam.id).first()
+    if report:
+        report.analysis_json = json.dumps(final_state.get("analysis", {}))
+        report.motivation_json = json.dumps(final_state.get("motivation", {}))
+    else:
+        db.add(AIReport(
+            exam_id=exam.id,
+            analysis_json=json.dumps(final_state.get("analysis", {})),
+            motivation_json=json.dumps(final_state.get("motivation", {})),
+        ))
     
     # Save Notes, Quizzes and Flashcards
     for topic in topics:

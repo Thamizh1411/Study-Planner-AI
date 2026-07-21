@@ -65,6 +65,16 @@ class StudyPlan(Base):
     
     exam = relationship("Exam", back_populates="study_plans")
 
+class AIReport(Base):
+    """Persist the latest generated analysis and motivation for an exam."""
+    __tablename__ = "ai_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    exam_id = Column(Integer, ForeignKey("exams.id", ondelete="CASCADE"), nullable=False, unique=True)
+    analysis_json = Column(Text, nullable=False)
+    motivation_json = Column(Text, nullable=False)
+    generated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
 class Note(Base):
     __tablename__ = "notes"
     
@@ -124,4 +134,3 @@ class PDFChunk(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     doc_name = Column(String, nullable=False)
     chunk_text = Column(Text, nullable=False)
-
